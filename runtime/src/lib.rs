@@ -432,6 +432,36 @@ parameter_types! {
 	pub const ExecutiveBody: BodyId = BodyId::Executive;
 }
 
+parameter_types! {
+	pub const AssetDeposit: Balance = 100 * UNIT;
+	pub const ApprovalDeposit: Balance = 1 * UNIT;
+	pub const StringLimit: u32 = 50;
+	pub const MetadataDepositBase: Balance = 10 * UNIT;
+	pub const MetadataDepositPerByte: Balance = 1 * UNIT;
+}
+
+impl pallet_assets::Config for Runtime {
+	type Event = Event;
+	type Balance = u128;
+	type AssetId = u32;
+	type Currency = Balances;
+	type ForceOrigin = EnsureRoot<AccountId>;
+	type AssetDeposit = AssetDeposit;
+	type AssetAccountDeposit = MetadataDepositPerByte;
+	type MetadataDepositBase = MetadataDepositBase;
+	type MetadataDepositPerByte = MetadataDepositPerByte;
+	type ApprovalDeposit = ApprovalDeposit;
+	type StringLimit = StringLimit;
+	type Freezer = ();
+	type Extra = ();
+	type WeightInfo = pallet_assets::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_sudo::Config for Runtime {
+	type Event = Event;
+	type Call = Call;
+}
+
 // We allow root only to execute privileged collator selection operations.
 pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
 
@@ -475,6 +505,10 @@ construct_runtime!(
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 10,
 		TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 11,
 
+		// Assets
+		Assets: pallet_assets::{Pallet, Call, Storage, Config<T>, Event<T>}  = 12,
+		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>}  = 13,
+
 		// Collator support. The order of these 4 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage} = 20,
 		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 21,
@@ -506,6 +540,7 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_collator_selection, CollatorSelection]
 		[cumulus_pallet_xcmp_queue, XcmpQueue]
+		[pallet_assets, Assets]
 	);
 }
 
